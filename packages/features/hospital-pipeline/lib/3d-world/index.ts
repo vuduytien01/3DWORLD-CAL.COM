@@ -2,8 +2,8 @@
  * Hospital World — Data Layer Entry Point
  *
  * Exports the renderer-free modules of the hospital world: KHOA slice
- * layout data, the world specification, character pose math and the perf
- * probe. Rendering itself lives in lib/html5-world.
+ * layout data, the world specification and character pose math.
+ * Rendering itself lives in lib/html5-world.
  */
 
 // KHOA floor slices (Lượt 7): dollhouse department slices for floors 2-3

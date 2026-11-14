@@ -11,10 +11,10 @@
  *   font loading are one-time costs, not steady state.
  * - median, never mean. The readout is sampled at frame cadence inside the
  *   page; p95/p99 come from the same samples.
- * - thresholds fps >= 27 and p95 frameMs <= 33.4, derived from
- *   IRIS_XE_RENDER_BUDGET (packages/features/hospital-pipeline/lib/3d-world/
- *   perf-probe.ts): 30 fps budget with ~10% headroom, 1000/30 rounded up so
- *   a 33.35ms jitter frame does not fail.
+ * - thresholds fps >= 27 and p95 frameMs <= 33.4, inherited from the retired
+ *   perf-probe module (deleted in c422780e9b; rationale in swarm/research/08):
+ *   30 fps budget with ~10% headroom, 1000/30 rounded up so a 33.35ms jitter
+ *   frame does not fail.
  *
  * Every number flows through window.__HOSPITAL_PERF__ (the readout mirror the
  * HTML5 renderer writes per frame) — the test never touches canvas internals.
@@ -45,10 +45,12 @@ test.skip(
   process.env.PERF_T09 !== "1",
   "Perf checkpoint is opt-in: run with PERF_T09=1 on an idle machine, headed Edge"
 );
-test.setTimeout(240_000);
+// 420s: two cold 150s goto budgets + readiness/zoom waits + measure windows
+// (same worst-day budget as demo-record)
+test.setTimeout(420_000);
 test.describe.configure({ retries: 0 });
 
-/** IRIS_XE_RENDER_BUDGET (perf-probe.ts) via research/08 §5 */
+/** Research/08 §5 thresholds (originally IRIS_XE_RENDER_BUDGET) */
 const FPS_MIN = 27;
 const P95_FRAME_MS_MAX = 33.4;
 

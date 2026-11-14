@@ -12,7 +12,7 @@ Bản kế hoạch lớp 3D hoàn chỉnh. Spike fps đã đo trên Iris Xe th�
 ## Notes
 
 - Ràng buộc cứng. Ngân sách $0. Render client trên Intel Iris Xe của ThinkPad P16s Gen 2 Intel 16GB. Triển khai Docker bằng một lệnh docker compose up. Bắt buộc gọi AI API qua FreeLLM gateway tự host :3001, OpenAI-compatible, có stub mode cho test.
-- Engine chốt three.js + React Three Fiber theo docs/adr/0002. 3D in scope full-detail nhiều tầng theo docs/adr/0001. Đọc spec.md, GLOSSARY.md và research/ trước khi làm bất kỳ ticket nào.
+- ~~Engine chốt three.js + React Three Fiber theo docs/adr/0002~~ — **SUPERSeded 2026-11-14**: ADR 0002 bị ADR 0003 thay thế (renderer HTML5 thuần, hybrid Canvas 2D isometric + DOM overlay — xem Decisions "Renderer HTML5 pivot"); 3D in scope full-detail nhiều tầng theo docs/adr/0001 vẫn giữ nguyên ở tầng dữ liệu/đo đạc. Đọc spec.md, GLOSSARY.md và research/ trước khi làm bất kỳ ticket nào.
 - Founder ghi rõ ngày 2026-11-07. Đặt lịch hẹn xong vào 3D để được AI agent chat dẫn lộ trình khám. Một agent phục vụ nhiều người dùng nên thiết kế sao không quá tải là mối quan tâm thiết kế số một của effort này.
 - Bảng hỏi GVHD (to-questionnaire-html5-compatibility.md) chờ founder điền tên và gửi. Câu trả lời nuôi kế hoạch demo ngày bảo vệ, không chặn ticket nào trong map này.
 - Điều kiện hội đồng còn nợ founder. Giờ làm thật mỗi tuần mỗi người, ngày bảo vệ, rubric chấm.
@@ -30,8 +30,8 @@ Bản kế hoạch lớp 3D hoàn chỉnh. Spike fps đã đo trên Iris Xe th�
 ## Not yet specified
 
 - ~~Chọn renderer HTML5 cụ thể (fog chính của pivot): CSS 3D true-3D (preserve-3d) vs CSS fake-iso (2D transform) vs Canvas 2D vs hybrid. Chờ 4 research facts: 17-html5-css3d-facts, 18-html5-canvas2d-facts, 19-html5-pivot-blast-radius, 20-html5-precedents. Ticket quyết định: ADR 0003.~~ — **ĐÃ CHỐT 2026-11-14**: hybrid Canvas 2D isometric + DOM overlay, theo [docs/adr/0003-html5-renderer.md](docs/adr/0003-html5-renderer.md) (chốt trên facts 17/18/19; fact 20 đang chạy, chỉ đối chiếu lại).
-- **Nhân vật đi bộ trong renderer HTML5:** div animation vs canvas sprite; tái dùng rig thủ tục L1 9 khớp từ `character-poses.ts` hay đơn giản hoá còn sprite 2 khung.
-- **Playwright E2E sau pivot:** selector DOM thay vì canvas WebGL; baseline 11/14 được chấm lại trên DOM thật.
+- ~~**Nhân vật đi bộ trong renderer HTML5:** div animation vs canvas sprite; tái dùng rig thủ tục L1 9 khớp từ `character-poses.ts` hay đơn giản hoá còn sprite 2 khung.~~ — **ĐÃ CHỐT 2026-11-14 (Task 3, commit `0724e98cbd`)**: patient walk là DOM sprite điều khiển bằng demo-timeline.stateAt(), rig thủ tục chuyển bản three-free vào `lib/html5-world/patient-rig.ts` (PoseRig, khớp giữ nguyên, không three); camera choreography map sang `__HOSPITAL_CAMERA__` {panX,panY,zoom,focusFloor}.
+- ~~**Playwright E2E sau pivot:** selector DOM thay vì canvas WebGL; baseline 11/14 được chấm lại trên DOM thật.~~ — **ĐÃ CHỐT HƯỚNG 2026-11-14 (P-T6)**: rewrite selector DOM theo map đếm từng test tại `swarm/research/21-html5-e2e-rewrite-map.md` (22 rows → READY 5 / NEEDS-DESIGN 9 / DIES 8) + adjudications v2 trong `task-6-brief.md` (bỏ pixel baseline, `?t=` seam duy nhất, perf = fps/frameMs). Trạng thái thực thi thật nằm ở ledger.
 
 - ~~Kịch bản demo 3 phút, camera choreography từng bước~~ — **ĐÃ CHỐT 2026-11-13**: choreography 180s trong `lib/demo/camera-choreography.ts` (25/25 test), lời dẫn 10 beat tiếng Việt cue theo segment ACTION trong `lib/demo/demo-script.ts` (7/7 test, templateId khớp bộ 10 AI guide), bảng beat + magic moment + checklist rủi ro tại `swarm/research/10-demo-script-va-rui-ro.md`.
 - Kế hoạch rủi ro demo ngày bảo vệ — **BẢN NHÁP KỸ THUẬT XONG 2026-11-13**: `demo-risk-plan.md` (plan A laptop live, plan B video 2 take — Playwright webm + Game Bar mp4, plan C máy chiếu; drill 4 bước). Phần [GVHD] (máy khoa hay máy riêng, máy chiếu gì) chờ bảng hỏi.
@@ -54,7 +54,7 @@ Chuỗi ticket thực thi pivot (sau khi 4 research facts về). Thứ tự:
 - **P-T5: Dọn dep WebGL** — gỡ three/@react-three/@types/three + @babylonjs/* (0 import, free drop theo matrix 19); xoá file REPLACE list; next.config.ts transpilePackages hunk.
 - **P-T6: E2E Playwright trên DOM** — 21 test/5 file, gate `canvas[data-engine^="three"]` → selector DOM; seams `__THREE_CAMERA_POSITION__`/`__ORBIT_CONTROLS_ENABLED__`/`__HOSPITAL_PERF__` thay bằng seam HTML5.
 
-Thực thi qua subagent-driven-development, plan `.scratch/hospital-pipeline/plans/2026-11-14-html5-pivot.md`, ledger `.superpowers/sdd/2026-11-14-html5-pivot/progress.md`. Gate chuẩn đã xác minh 2026-11-14: `cd packages/features/hospital-pipeline && bunx vitest run` = 405/405 (`bun test` trực tiếp sai runner, fail giả).
+Thực thi qua subagent-driven-development, plan `.scratch/hospital-pipeline/plans/2026-11-14-html5-pivot.md`, ledger `.superpowers/sdd/2026-11-14-html5-pivot/progress.md`. **Danh sách P-T ở đây là view quyết định; trạng thái thực thi thật (task nào xong, commit nào) nằm ở ledger.** Gate chuẩn đã xác minh 2026-11-14: `cd packages/features/hospital-pipeline && bunx vitest run` = 402/402 (`bun test` trực tiếp sai runner, fail giả).
 
 ## Out of scope
 
