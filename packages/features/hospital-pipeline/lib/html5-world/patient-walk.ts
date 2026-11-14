@@ -112,8 +112,8 @@ function restackPose(pose: CameraPose, floor: number): CameraPose {
 /**
  * `samplePoseAt` with every height restacked onto the dollhouse. A segment's
  * end pose belongs to its own step's floor; an inherited start pose belongs to
- * the previous segment's step; aerial overrides frame the ground floor and
- * pass through untouched. Same segment matching and null window as
+ * the previous segment's step, and an intro start with no predecessor sits on
+ * its own step's floor. Same segment matching and null window as
  * `samplePoseAt`, so renderer and demo HUD cannot disagree at boundaries.
  */
 export function sampleRestackedPoseAt(
@@ -123,11 +123,7 @@ export function sampleRestackedPoseAt(
   const restacked = segments.map((segment, index) => {
     const stepFloor = STEP_LOCATION_BY_ID.get(segment.stepId)?.floor ?? 0;
     const previous = segments[index - 1];
-    const fromFloor = segment.fromPoseOverride
-      ? 0
-      : previous
-        ? (STEP_LOCATION_BY_ID.get(previous.stepId)?.floor ?? 0)
-        : stepFloor;
+    const fromFloor = previous ? (STEP_LOCATION_BY_ID.get(previous.stepId)?.floor ?? 0) : stepFloor;
     return {
       ...segment,
       from: restackPose(segment.from, fromFloor),
