@@ -7,6 +7,8 @@ Charted: 2026-11-07
 
 Bản kế hoạch lớp 3D hoàn chỉnh. Spike fps đã đo trên Iris Xe thật, dữ liệu vị trí trong Step Graph chốt, kiến trúc scene và camera chốt, kế hoạch asset chốt, và kiến trúc AI guide chịu tải nhiều người dùng chốt. Xong khi nhóm vào code thật mà không còn gì phải quyết.
 
+**Sửa destination 2026-11-14 (founder chỉ định):** render chuyển hướng sang **HTML5 thuần** — bỏ three.js/WebGL, thay bằng DOM + CSS 3D và/hoặc Canvas 2D, giữ nguyên data layer (step-graph, khoa data, triage, AI guide, demo logic). Động cơ: WebGL2 có thể thiếu/bị chặn ở phòng bảo vệ (bảng hỏi GVHD `to-questionnaire-html5-compatibility.md`) và Iris Xe là rủi ro tồn tại. Destination mới: demo hospital pipeline chạy không cần WebGL trên máy bất kỳ, mọi test data-layer giữ xanh, E2E chạy trên DOM thật thay vì canvas WebGL.
+
 ## Notes
 
 - Ràng buộc cứng. Ngân sách $0. Render client trên Intel Iris Xe của ThinkPad P16s Gen 2 Intel 16GB. Triển khai Docker bằng một lệnh docker compose up. Bắt buộc gọi AI API qua FreeLLM gateway tự host :3001, OpenAI-compatible, có stub mode cho test.
@@ -15,17 +17,44 @@ Bản kế hoạch lớp 3D hoàn chỉnh. Spike fps đã đo trên Iris Xe th�
 - Bảng hỏi GVHD (to-questionnaire-html5-compatibility.md) chờ founder điền tên và gửi. Câu trả lời nuôi kế hoạch demo ngày bảo vệ, không chặn ticket nào trong map này.
 - Điều kiện hội đồng còn nợ founder. Giờ làm thật mỗi tuần mỗi người, ngày bảo vệ, rubric chấm.
 - Skill cho từng loại ticket. research gọi skill research. prototype gọi skill prototype. grilling gọi skill grilling cùng skill domain-modeling.
+- Thực thi thiết kế 2026-11-07 bằng skill có sẵn: preview 3D 5 prop đo tris thật, 13 PNG biển tiếng Việt 1024/512px, swatch trang phục. Triết lý thị giác Mint Order chốt bảng màu 8 sắc. Lượt 2: vignette góc tiếp đón 6×5 m đo 542 tris toàn cảnh, biển nạp CanvasTexture đúng đường ticket 08 nhóm 6, màn xếp hàng đề xuất thêm cho ticket 05, hai sắc sàn/tường phái sinh #EEF5F2/#CDEBE3. Lượt 3: slice liên tầng hành lang tầng 2 8×3 m đo 776 tris hai tầng, lỗ thang xuyên sàn thấy xuống tầng 1 (dollhouse cutaway cho ADR-0001), thang máy âm tường nhô 0.76 m, dirTex thêm mũi tên trái, cổng #norotate qua hash URL để chụp headless ổn định góc. Kết quả: design/2026-11-07-design-execution.md. Lượt 4: kiểm duyệt ui-taste cả 3 fragment, sửa cursor grab + touch-action, prefers-reduced-motion, màn xếp hàng đổi navy #0B1B2A sang #134E4A (tương phản 7.52:1 đạt AA), viền swatch, flex-wrap; receipt bằng chứng design/ui-evidence/visual-evidence.json (exit=0); hai check kéo orbit và reduced-motion bị chặn chờ founder thử tay. Lượt 5: fragment demo hoàn chỉnh — sàn 18×5 m đủ 8 trạm pipeline, bệnh nhân đi bộ tự động với vung tay chân, 8 chip bước 3 trạng thái, panel chat AI guide mock theo từng trạm, camera bám theo, 1.046 tris toàn cảnh; mảng STEPS lần đầu ghép nút step-graph với toạ độ 3D (hình dạng dữ liệu đề xuất cho ticket 03); ảnh chốt design/ui-evidence/walkthrough1.png, cỡ chụp chuẩn chốt 1100×700 (1500×900 ra trắng tất định). Lượt 6: kế hoạch dollhouse tầng các khoa 24×12 m — 6 khoa 10 phòng chuyên môn (NỘI, CDHA, NGOẠI, MẮT, TMH, RHM) với nội thất riêng từng loại phòng (giường khám, gantry X-quang, máy siêu âm, bàn mổ, đo thị lực, ghế răng), signage hai cấp (biển khoa treo #134E4A + biển phòng trên tường #0F766E), mảng KHOA khoa→phòng→kind sinh tường/cửa tự động (hình dạng dữ liệu đề xuất mở rộng cho ticket 03, spec chuyên môn là mồi điều phối AI guide ticket 04); 1.820 tris toàn tầng ⇒ ước ~18k cho 10 tầng, ảnh chốt design/ui-evidence/khoa1.png byte-identical 83878 B; khoa4 trắng ngẫu nhiên một lần rồi chụp lại ra chuẩn (trắng không loại trừ được ở mọi cỡ). Ảnh concept AI sinh vẫn chờ key hoặc lần khởi động có MCP mới bật.
 
 ## Decisions so far
 
+- **Thiết kế cơ bản asset qua Scenario 3D (2026-11-07).** 7 nhóm tự dựng từ survey chia thành 5 nhóm sinh AI (bàn tiếp đón với máy vé, máy xét nghiệm, thang bộ, thang máy, ghế băng dãy) và 2 nhóm thủ công (biển tiếng Việt là plane cộng texture, trang phục y tế là texture trên base Quaternius). Mỗi thẻ có prompt concept, ngân sách 0.8k đến 5k tris, named parts, và runbook 6 bước. Chưa chạy được bước sinh nào vì Scenario MCP chưa nối vào phiên, và Scenario tính CU trả tiền xung đột với ràng buộc $0 cho đến khi founder xác nhận có credit. Kết quả đầy đủ: [design/2026-11-07-asset-concept-design.md](design/2026-11-07-asset-concept-design.md)
 - **Asset survey CC0 (2026-11-07).** Không có pack bệnh viện CC0 hoàn chỉnh ở nguồn nào khảo sát. Nền CC0 là Kenney Furniture Kit và Building Kit cho nội thất cùng khối nhà, và Quaternius Base Characters cùng Animation Library cho nhân vật có walk và sit. Nội dung bệnh viện thật trên itch.io không phải CC0, license là CC-BY hoặc custom. Sketchfab lọc CC0 cho từ khóa hospital chỉ ra model vô dụng. Phải tự dựng Blender khoảng 6 đến 8 nhóm gồm bàn tiếp đón với máy phát vé, máy xét nghiệm, thang bộ và thang máy, biển chỉ dẫn tiếng Việt, ghế băng dãy, texture trang phục y tế. Kết quả đầy đủ: [research/2026-11-07-asset-survey-cc0.md](research/2026-11-07-asset-survey-cc0.md)
+- **Location Data Structure (2026-11-07).** STEPS array (8 bước pipeline → toạ độ 3D + tin nhắn AI Guide), KHOA array (8 khoa tầng 1 + 60 khoa tầng 2-10, 10 loại phòng với furniture kinds, tường/cửa/biển sinh tự động từ toạ độ), SIGN_HOSTS (transformneo biển step-chip/dept-hanging/room-wall/direction-arrow). Đơn nhất data source cho 3D scene, AI Guide, demo script. Spec: [specs/03-location-data-structure.md](specs/03-location-data-structure.md).
+- **AI Guide Service Architecture (2026-11-07).** Single server (Node.js + WebSocket) phục vụ mọi bệnh nhân đồng thời. Template-first 10 mẫu (chào, trạng thái, chờ, bước sau, chỉ đường khoa, chi phí, thanh toán, BHYT, info, fallback) hit rate >90%. LLM fallback qua FreeLLM gateway :3001 (stub mode cho test, GGUF nhỏ cho prod). Session state gắn STEP_LOCATIONS + triageDepartment(). Frontend chỉ hiển thị, không gọi LLM. Spec: [specs/04-ai-guide-service.md](specs/04-ai-guide-service.md).
+- **Renderer HTML5 pivot (2026-11-14).** Bỏ three.js/WebGL khỏi renderer hospital-pipeline; kỹ thuật chốt là hybrid Canvas 2D isometric (oblique cố định, hai lớp canvas tĩnh/động) + DOM overlay (signage tiếng Việt, chip bước, hotspot `[data-room]`/`[data-floor]`/`[data-hospital-ready]` cho e2e DOM). CSS3D true-3D loại vì bẫy flatten + hit-test inference; fake-iso loại vì nghiêng chữ; Canvas thuần loại vì mất DOM text. Data layer (step-graph, khoa-slice, world-spec, demo timeline, camera-choreography) giữ nguyên. Kết quả đầy đủ: [docs/adr/0003-html5-renderer.md](docs/adr/0003-html5-renderer.md)
 
 ## Not yet specified
 
-- Kịch bản demo 3 phút, camera choreography từng bước. Phụ thuộc kết quả spike và floor plan.
-- Kế hoạch rủi ro demo ngày bảo vệ, laptop riêng hay máy khoa, video dự phòng, checklist. Chờ câu trả lời bảng hỏi GVHD.
-- Mức hoạt ảnh nhân vật (đi, idle) bao nhiêu là đủ. Phụ thuộc asset survey.
-- Cách mô phỏng thời gian chờ trong demo, thời gian thật hay nén hay nút thủ công. Thuộc cụm kịch bản demo.
+- ~~Chọn renderer HTML5 cụ thể (fog chính của pivot): CSS 3D true-3D (preserve-3d) vs CSS fake-iso (2D transform) vs Canvas 2D vs hybrid. Chờ 4 research facts: 17-html5-css3d-facts, 18-html5-canvas2d-facts, 19-html5-pivot-blast-radius, 20-html5-precedents. Ticket quyết định: ADR 0003.~~ — **ĐÃ CHỐT 2026-11-14**: hybrid Canvas 2D isometric + DOM overlay, theo [docs/adr/0003-html5-renderer.md](docs/adr/0003-html5-renderer.md) (chốt trên facts 17/18/19; fact 20 đang chạy, chỉ đối chiếu lại).
+- **Nhân vật đi bộ trong renderer HTML5:** div animation vs canvas sprite; tái dùng rig thủ tục L1 9 khớp từ `character-poses.ts` hay đơn giản hoá còn sprite 2 khung.
+- **Playwright E2E sau pivot:** selector DOM thay vì canvas WebGL; baseline 11/14 được chấm lại trên DOM thật.
+
+- ~~Kịch bản demo 3 phút, camera choreography từng bước~~ — **ĐÃ CHỐT 2026-11-13**: choreography 180s trong `lib/demo/camera-choreography.ts` (25/25 test), lời dẫn 10 beat tiếng Việt cue theo segment ACTION trong `lib/demo/demo-script.ts` (7/7 test, templateId khớp bộ 10 AI guide), bảng beat + magic moment + checklist rủi ro tại `swarm/research/10-demo-script-va-rui-ro.md`.
+- Kế hoạch rủi ro demo ngày bảo vệ — **BẢN NHÁP KỸ THUẬT XONG 2026-11-13**: `demo-risk-plan.md` (plan A laptop live, plan B video 2 take — Playwright webm + Game Bar mp4, plan C máy chiếu; drill 4 bước). Phần [GVHD] (máy khoa hay máy riêng, máy chiếu gì) chờ bảng hỏi.
+- ~~Mức hoạt ảnh nhân vật (đi, idle) bao nhiêu là đủ~~ — **ĐÃ CHỐT 2026-11-13**: rig thủ tục L1 9 khớp (11 Object3D) theo research/13, `lib/3d-world/character-poses.ts` — đi bộ vung tay chân ±30° + nhún khung hông, idle thở + chuyển trọng tâm, ~1k tris, không cần bone skinning; 18/18 test. Đã ghép vào PatientAvatar qua `demo-timeline.stateAt()` (approach = đi, action/outro = idle), suite package 340/340.
+- ~~Cách mô phỏng thời gian chờ trong demo~~ — **ĐÃ CHỐT 2026-11-13**: NÉN thời gian 30x mặc định (2 giây demo = 1 phút thật) trong `lib/demo/wait-simulation.ts` (11/11 test), `secondsPerMinute` đổi 1:1 khi cần, states waiting/called, format khớp copy AI guide "Ước lượng chờ: ~X phút".
+
+## Specified — ready to implement
+
+- **Ticket 03: Location Data Structure** — STEPS array (8 pipeline steps with 3D positions + AI messages), KHOA array (8 departments ground floor + 60 upper floors, 10 rooms with furniture kinds, auto walls/doors/signage), SIGN_HOSTS (signage anchor transforms). Spec: `specs/03-location-data-structure.md`. Unblocks Ticket 04 (AI Guide), Ticket 06 (Scene), Ticket 07 (Demo script).
+- **Ticket 04: AI Guide Service** — Single Node.js server handling all concurrent patients via WebSocket. Template-first (10 templates, >90% hit rate), LLM fallback to FreeLLM gateway :3001 (stub mode for tests). Session state binds to STEP_LOCATIONS + triageDepartment(). Frontend is thin display only. Spec: `specs/04-ai-guide-service.md`. Unblocks Ticket 07 (Demo chat integration).
+
+## Pivot HTML5 — tickets (2026-11-14)
+
+Chuỗi ticket thực thi pivot (sau khi 4 research facts về). Thứ tự:
+
+- **P-T1: ADR 0003 — Renderer HTML5.** Ghi quyết định: bỏ three.js/WebGL, chọn kỹ thuật (CSS3D/fake-iso/Canvas2D/hybrid) dựa trên research 17-20. Điều kiện: đủ facts.
+- **P-T2: HTML5 renderer core** (`lib/html5-world/`) — dollhouse isometric đa tầng từ KHOA_UPPER_FLOOR_PLANS + STEP_LOCATIONS, phòng click, signage DOM, test seam data-attribute thay `canvas[data-engine]`.
+- **P-T3: Patient + timeline ghép renderer** — demo-timeline.stateAt() điều khiển nhân vật HTML5; camera choreography map sang pan/zoom; tách leak `createCharacterRig(): THREE.Group` khỏi character-poses.ts.
+- **P-T4: Mount page apps/web + AI guide HUD** — `/hospital-demo` mount renderer HTML5, giữ use-guide-ws.
+- **P-T5: Dọn dep WebGL** — gỡ three/@react-three/@types/three + @babylonjs/* (0 import, free drop theo matrix 19); xoá file REPLACE list; next.config.ts transpilePackages hunk.
+- **P-T6: E2E Playwright trên DOM** — 21 test/5 file, gate `canvas[data-engine^="three"]` → selector DOM; seams `__THREE_CAMERA_POSITION__`/`__ORBIT_CONTROLS_ENABLED__`/`__HOSPITAL_PERF__` thay bằng seam HTML5.
+
+Thực thi qua subagent-driven-development, plan `.scratch/hospital-pipeline/plans/2026-11-14-html5-pivot.md`, ledger `.superpowers/sdd/2026-11-14-html5-pivot/progress.md`. Gate chuẩn đã xác minh 2026-11-14: `cd packages/features/hospital-pipeline && bunx vitest run` = 405/405 (`bun test` trực tiếp sai runner, fail giả).
 
 ## Out of scope
 
