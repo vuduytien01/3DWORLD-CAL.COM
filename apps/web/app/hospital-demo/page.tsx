@@ -113,6 +113,16 @@ export default function HospitalDemoPage() {
       : null;
   const hudSessionId = demoSession ?? 'hospital-demo-chat';
 
+  // E2E seam: ?t=<seconds> seeds the demo clock so a test can land directly in
+  // a segment (floor hop at t=44) instead of waiting out the 180s wall clock.
+  // No param → 0 → behavior unchanged. Clamped into [0, DEMO_DURATION_S].
+  const demoStartOffsetS = useMemo(() => {
+    if (typeof window === 'undefined') return 0;
+    const raw = new URLSearchParams(window.location.search).get('t');
+    const parsed = raw === null ? 0 : Number.parseFloat(raw);
+    return Number.isFinite(parsed) ? Math.min(Math.max(parsed, 0), DEMO_DURATION_S) : 0;
+  }, []);
+
   // 10-beat demo narration (lib/demo/demo-script.ts) pushed into the chat
   // HUD as guide bubbles: intro at mount, one bubble when the patient reaches
   // each pipeline step, outro right after the final step beat. Keyed by beat
@@ -124,10 +134,10 @@ export default function HospitalDemoPage() {
   // (hold segments and idle stations), so React re-renders only during motion
   const [demoFrame, setDemoFrame] = useState<DemoFrame>(() => ({
     cameraPose:
-      sampleRestackedPoseAt(demoTimeline.segments, 0) ??
+      sampleRestackedPoseAt(demoTimeline.segments, demoStartOffsetS) ??
       // Unreachable: the validated 180s choreography always covers t=0
       { position: { x: 0, y: 24, z: -6 }, target: { x: 0, y: 1.5, z: 6 } },
-    patientState: patientWalkAt(demoTimeline.stateAt(0)),
+    patientState: patientWalkAt(demoTimeline.stateAt(demoStartOffsetS)),
   }));
   const lastFloorRef = useRef(-1);
 
@@ -166,7 +176,7 @@ export default function HospitalDemoPage() {
     let lastActionStepId = '';
     const startMs = performance.now();
     const tick = () => {
-      const elapsedS = Math.min((performance.now() - startMs) / 1000, DEMO_DURATION_S);
+      const elapsedS = Math.min(demoStartOffsetS + (performance.now() - startMs) / 1000, DEMO_DURATION_S);
       const state = demoTimeline.stateAt(elapsedS);
       const segment = state.cameraSegment;
 
@@ -200,7 +210,7 @@ export default function HospitalDemoPage() {
     };
     rafId = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(rafId);
-  }, [narrateStep]);
+  }, [narrateStep, demoStartOffsetS]);
 
   const handleGuideMessage = useCallback((msg: GuideServerMessage) => {
     const id = `guide-${(messageIdRef.current += 1)}`;
