@@ -12,7 +12,7 @@
     "cli": "ts-node --transpile-only src/cli.tsx",
     "watch": "ts-node --transpile-only src/build.ts --watch",
     "generate": "ts-node --transpile-only src/build.ts",
-    "post-install": "yarn build"
+    "post-install": "bun run build"
   },
   "files": [
     "dist/cli.js"
