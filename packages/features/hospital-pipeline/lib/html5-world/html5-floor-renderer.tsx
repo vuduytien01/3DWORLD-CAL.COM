@@ -5,7 +5,7 @@
  *
  * Two canvases: the static layer redraws only when the camera or data changes
  * (walls, rooms, doors, corridor, background-floor signage), the dynamic layer
- * redraws every rAF frame with a clamped delta time (patient marker). The DOM
+ * redraws every rAF frame with a clamped delta time (patient rig + marker). The DOM
  * overlay carries real Vietnamese signage text, step chips and room hotspots
  * for focus floor ± 1 only, positioned through the same worldToScreen module
  * as the canvas. React never owns camera or animation state — everything
@@ -26,13 +26,13 @@ import {
   type Html5World,
   overlayFloorRange,
 } from "./floor-plan";
+import { CHARACTER_BONES, forwardKinematics, projectCharacterRig, sampleCharacterPose } from "./patient-rig";
 import { type IsometricCamera, type ScreenPoint, sortPainters, worldToScreen } from "./world-to-screen";
 
 const DPR_CAP = 2;
 const CULL_MARGIN_PX = 96;
 const BACKGROUND_FLOOR_ALPHA = 0.35;
 const SIGN_FONT_STACK = "'Be Vietnam Pro', Inter, 'Noto Sans', sans-serif";
-const WALK_CYCLE_HZ = 2.2;
 
 const OVERLAY_CSS = `
 .html5-canvas { position: absolute; inset: 0; display: block; }
@@ -52,6 +52,12 @@ export interface Html5PatientState {
   x: number;
   y: number;
   z: number;
+  /** Facing yaw in radians (atan2(dx, dz)); absent faces the +Z corridor axis. */
+  headingRad?: number;
+  /** True while the timeline walks the patient (walk cycle instead of idle). */
+  walking?: boolean;
+  /** Walk-cycle phase in [0, 1) while walking. */
+  walkPhase?: number;
 }
 
 export interface Html5FloorRendererProps {
@@ -385,22 +391,40 @@ export function Html5FloorRenderer(props: Html5FloorRendererProps) {
         patientMarker.style.display = "none";
         return;
       }
-      // Idle bob advances on the clamped walk clock so the loop stays
-      // frame-rate independent; Task 3 replaces the glyph with pose math.
-      const bob = Math.sin(walkClockS * WALK_CYCLE_HZ * Math.PI * 2) * 0.03;
-      const point = worldToScreen(patient.x, patient.y + bob, patient.z, camera);
-      const r = Math.max(3, Math.min(10, camera.zoom * 0.22));
-      dynamicCtx.fillStyle = HTML5_PALETTE.patient;
-      dynamicCtx.strokeStyle = HTML5_PALETTE.primaryDark;
-      dynamicCtx.lineWidth = 1;
-      dynamicCtx.beginPath();
-      dynamicCtx.ellipse(point.sx, point.sy - r * 1.6, r * 0.8, r * 1.6, 0, 0, Math.PI * 2);
-      dynamicCtx.fill();
-      dynamicCtx.stroke();
-      dynamicCtx.beginPath();
-      dynamicCtx.arc(point.sx, point.sy - r * 3.4, r * 0.75, 0, Math.PI * 2);
-      dynamicCtx.fill();
-      dynamicCtx.stroke();
+      // Idle breath advances on the clamped walk clock so the loop stays
+      // frame-rate independent; the walk phase arrives with the timeline state.
+      const pose = sampleCharacterPose({
+        walking: patient.walking ?? false,
+        walkPhase: patient.walkPhase,
+        idleTimeS: walkClockS,
+      });
+      const joints = forwardKinematics(pose, patient.headingRad ?? 0);
+      const screen = projectCharacterRig(joints, patient, camera);
+      const limbPx = Math.max(1.5, Math.min(5, camera.zoom * 0.1));
+      dynamicCtx.lineCap = "round";
+      dynamicCtx.lineJoin = "round";
+      dynamicCtx.strokeStyle = HTML5_PALETTE.patient;
+      dynamicCtx.lineWidth = limbPx;
+      for (const [from, to] of CHARACTER_BONES) {
+        const a = screen[from];
+        const b = screen[to];
+        if (!a || !b) continue;
+        dynamicCtx.beginPath();
+        dynamicCtx.moveTo(a.sx, a.sy);
+        dynamicCtx.lineTo(b.sx, b.sy);
+        dynamicCtx.stroke();
+      }
+      const head = screen.head;
+      if (head) {
+        dynamicCtx.fillStyle = HTML5_PALETTE.patient;
+        dynamicCtx.strokeStyle = HTML5_PALETTE.primaryDark;
+        dynamicCtx.lineWidth = 1;
+        dynamicCtx.beginPath();
+        dynamicCtx.arc(head.sx, head.sy, Math.max(2, camera.zoom * 0.11), 0, Math.PI * 2);
+        dynamicCtx.fill();
+        dynamicCtx.stroke();
+      }
+      const point = worldToScreen(patient.x, patient.y, patient.z, camera);
       patientMarker.style.display = "block";
       patientMarker.style.transform = `translate(${point.sx.toFixed(1)}px, ${point.sy.toFixed(1)}px)`;
     };
