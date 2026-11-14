@@ -43,26 +43,6 @@ export {
   type PoseRigNode,
   resetCharacterRig,
 } from "./character-poses";
-// Perf probe (fps/frame-time EMA + window mirror)
-export {
-  type BudgetCheckResult,
-  type BudgetVerdict,
-  computeEma,
-  createPerfProbe,
-  detachPerfReadout,
-  evaluateBudget,
-  formatReadout,
-  formatTris,
-  fpsFromFrameMs,
-  type HospitalPerfReadout,
-  IRIS_XE_RENDER_BUDGET,
-  type PerfProbe,
-  type PerfProbeOptions,
-  readPerfReadout,
-  type RenderBudget,
-  type RendererRenderInfo,
-  usePerfReadout,
-} from "./perf-probe";
 // World specification and data structures
 export {
   type AtmosphereSpec,
