@@ -2,9 +2,8 @@
  * T-14 — Character L1 procedural poses (walk / idle) for patient avatar.
  *
  * Pose math thuần, không phụ thuộc renderer: thao tác trên PoseRig —
- * tra node theo tên rồi rotation.set theo trục local. Builder THREE cho
- * bộ node này nằm ở character-rig-three.ts; renderer khác (HTML5) dựng
- * rig riêng khớp cùng CHARACTER_NODE_NAMES.
+ * tra node theo tên rồi rotation.set theo trục local. HTML5 renderer dựng
+ * rig riêng (lib/html5-world/patient-rig.ts) khớp cùng CHARACTER_NODE_NAMES.
  *
  * Cấu trúc phân cấp (pose math chỉ cần rotation local trên từng node):
  * - root (pelvis)
