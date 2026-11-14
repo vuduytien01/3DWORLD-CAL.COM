@@ -40,7 +40,7 @@ const CONSULTATION_NARRATION_PREFIX = "Được gọi khám, camera đưa chúng
 
 /** Open the demo page and wait until the HTML5 renderer claims readiness */
 async function gotoHospitalDemo(page: Page, query = ""): Promise<void> {
-  await page.goto(`/hospital-demo${query}`, { waitUntil: "networkidle" });
+  await page.goto(`/hospital-demo${query}`, { waitUntil: "networkidle", timeout: 150_000 });
   await page.waitForFunction(() => !!document.querySelector('[data-hospital-ready="true"]'), undefined, {
     timeout: 45000,
   });

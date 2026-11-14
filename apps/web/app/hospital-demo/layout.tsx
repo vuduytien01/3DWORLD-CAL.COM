@@ -3,7 +3,7 @@
  */
 
 export const metadata = {
-  title: 'Hospital 3D Demo - Cal.diy',
+  title: 'Hospital Demo - Cal.diy',
   description: 'Multi-floor hospital simulation with AI Guide integration',
 };
 

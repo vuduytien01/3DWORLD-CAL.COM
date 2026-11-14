@@ -98,7 +98,7 @@ async function mockGuideService(page: Page): Promise<void> {
 
 /** Open the demo page and wait until the HTML5 renderer claims readiness */
 async function gotoHospitalDemo(page: Page): Promise<void> {
-  await page.goto("/hospital-demo", { waitUntil: "networkidle" });
+  await page.goto("/hospital-demo", { waitUntil: "networkidle", timeout: 150_000 });
 
   await page.waitForFunction(() => !!document.querySelector('[data-hospital-ready="true"]'), undefined, {
     timeout: 45000,

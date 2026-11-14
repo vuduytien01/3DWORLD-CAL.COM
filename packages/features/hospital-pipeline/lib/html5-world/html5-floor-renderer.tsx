@@ -501,17 +501,21 @@ export function Html5FloorRenderer(props: Html5FloorRendererProps) {
     rafId = requestAnimationFrame(frame);
 
     // Fonts decide text metrics; readiness is claimed only after they land,
-    // on top of the first static paint the effect already made.
+    // on top of the first static paint the effect already made. A hung font
+    // load (defense-room network) must not wedge the page unready forever,
+    // so fonts.ready races a 3s fallback.
     const markReady = (): void => {
       if (disposed) return;
       container.dataset.hospitalReady = "true";
       redrawAll();
     };
-    if (typeof document !== "undefined" && document.fonts) {
-      void document.fonts.ready.then(markReady);
-    } else {
-      markReady();
-    }
+    const fontsReady = (): Promise<void> =>
+      typeof document !== "undefined" && document.fonts
+        ? (document.fonts.ready as Promise<void>)
+        : Promise.resolve();
+    const fontsTimeout = (): Promise<void> =>
+      new Promise((resolve) => setTimeout(resolve, 3000));
+    void Promise.race([fontsReady(), fontsTimeout()]).then(markReady);
 
     return () => {
       disposed = true;

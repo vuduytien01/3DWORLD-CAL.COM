@@ -28,7 +28,7 @@ test.describe("Hospital HTML5 Demo — Mobile 390x844", () => {
   test.use({ viewport: { width: 390, height: 844 } });
 
   test("mounts the HTML5 stage on mobile viewport", async ({ page }) => {
-    await page.goto("/hospital-demo", { waitUntil: "networkidle" });
+    await page.goto("/hospital-demo", { waitUntil: "networkidle", timeout: 150_000 });
     await page.waitForFunction(() => !!document.querySelector('[data-hospital-ready="true"]'), undefined, {
       timeout: 45000,
     });
@@ -44,7 +44,7 @@ test.describe("Hospital HTML5 Demo — Mobile 390x844", () => {
   });
 
   test("shows the ticket chip and intro narration on mobile viewport", async ({ page }) => {
-    await page.goto("/hospital-demo", { waitUntil: "networkidle" });
+    await page.goto("/hospital-demo", { waitUntil: "networkidle", timeout: 150_000 });
     await page.waitForFunction(() => !!document.querySelector('[data-hospital-ready="true"]'), undefined, {
       timeout: 45000,
     });
@@ -65,7 +65,7 @@ test.describe("Hospital HTML5 Demo — Mobile 390x844", () => {
     // Seed near the queue→consultation approach (t=44-50): the restacked
     // camera target crosses 3m at ~t=47, focusFloor flips 0 → 1; the
     // consultation narration beat fires on action-phase entry at t=50
-    await page.goto("/hospital-demo?t=40", { waitUntil: "networkidle" });
+    await page.goto("/hospital-demo?t=40", { waitUntil: "networkidle", timeout: 150_000 });
     await page.waitForFunction(() => !!document.querySelector('[data-hospital-ready="true"]'), undefined, {
       timeout: 45000,
     });

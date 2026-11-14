@@ -39,7 +39,7 @@ test("record demo take 1 — full 180s timeline to take1.webm", async ({ browser
   const page = await context.newPage();
 
   try {
-    await page.goto("/hospital-demo", { waitUntil: "networkidle" });
+    await page.goto("/hospital-demo", { waitUntil: "networkidle", timeout: 150_000 });
     await waitHtml5Ready(page);
 
     // timed hold, not a perf assertion — this take may run beside compile agents

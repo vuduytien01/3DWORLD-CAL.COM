@@ -55,7 +55,7 @@ const Html5FloorRendererDynamic = dynamic(
           fontSize: '16px',
         }}
       >
-        Đang tải bối cảnh 3D...
+        Đang tải bối cảnh demo...
       </div>
     ),
   }
@@ -182,8 +182,6 @@ export default function HospitalDemoPage() {
 
       if (segment?.phase === 'action' && segment.stepId !== lastActionStepId) {
         lastActionStepId = segment.stepId;
-        const label = STEP_LOCATION_BY_ID.get(segment.stepId)?.label ?? segment.stepId;
-        console.log('[HospitalDemo] Step changed:', label);
         narrateStep(segment.stepId);
       }
 
@@ -191,7 +189,6 @@ export default function HospitalDemoPage() {
       const floorIndex = patient ? Math.round(patient.floor) : -1;
       if (patient && floorIndex !== lastFloorRef.current) {
         lastFloorRef.current = floorIndex;
-        console.log('[HospitalDemo] Floor changed:', floorIndex + 1);
       }
 
       const sampled = sampleRestackedPoseAt(demoTimeline.segments, elapsedS);
@@ -284,7 +281,7 @@ export default function HospitalDemoPage() {
               justifyContent: 'center',
             }}
           >
-            Đang tải bối cảnh 3D...
+            Đang tải bối cảnh demo...
           </div>
         }
       >

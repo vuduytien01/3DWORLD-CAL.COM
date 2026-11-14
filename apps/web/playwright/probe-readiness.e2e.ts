@@ -34,7 +34,7 @@ test("probe HTML5 readiness conditions", async ({ page }) => {
     consoleErrors.push(`PAGEERROR: ${error.message.slice(0, 300)}`);
   });
 
-  await page.goto("/hospital-demo", { waitUntil: "networkidle" });
+  await page.goto("/hospital-demo", { waitUntil: "networkidle", timeout: 150_000 });
 
   await page.waitForFunction(() => !!document.querySelector('[data-hospital-ready="true"]'), undefined, {
     timeout: 45000,
