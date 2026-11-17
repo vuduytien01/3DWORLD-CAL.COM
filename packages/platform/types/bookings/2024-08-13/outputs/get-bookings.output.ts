@@ -9,7 +9,7 @@ import {
   GetSeatedBookingOutput_2024_08_13,
   PaginationMetaDto,
   RecurringBookingOutput_2024_08_13,
-} from "@calcom/platform-types";
+} from "../../../index";
 
 @ApiExtraModels(
   BookingOutput_2024_08_13,
