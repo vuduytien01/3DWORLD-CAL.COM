@@ -29,13 +29,24 @@ const IS_EMBED_REACT_TEST = process.argv.some((a) => a.startsWith("--project=@ca
 // Suppress all webServer logs to reduce noise during E2E tests
 const webServer: PlaywrightTestConfig["webServer"] = [
   {
-    command:
-      "yarn workspace @calcom/web copy-app-store-static && NEXT_PUBLIC_IS_E2E=1 NODE_OPTIONS='--dns-result-order=ipv4first' yarn workspace @calcom/web start -p 3000",
-    port: 3000,
+    command: "node hospital-mock-server.js",
+    cwd: __dirname,
+    port: 3003,
+    timeout: 30_000,
+    reuseExistingServer: true,
+    stdout: "inherit",
+    stderr: "inherit",
+  },
+  {
+    // Guide Service WS (research/16): WS-only server passes Playwright's TCP
+    // port wait; stub mode keeps FreeLLM gateway :3001 out of the test path
+    command: "bun packages/features/hospital-pipeline/lib/ai-guide/ws-entry.ts",
+    port: 3002,
     timeout: 60_000,
     reuseExistingServer: !process.env.CI,
-    stdout: "ignore",
-    stderr: "ignore",
+    env: { FREELLM_STUB: "true" },
+    stdout: "pipe",
+    stderr: "pipe",
   },
 ];
 
@@ -108,7 +119,7 @@ const config: PlaywrightTestConfig = {
   outputDir: path.join(outputDir, "results"),
   webServer,
   use: {
-    baseURL: process.env.NEXT_PUBLIC_WEBAPP_URL,
+    baseURL: process.env.NEXT_PUBLIC_WEBAPP_URL || "http://localhost:3000",
     locale: "en-US",
     trace: "retain-on-failure",
     headless,
@@ -123,7 +134,10 @@ const config: PlaywrightTestConfig = {
       },
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore TS definitions for USE are wrong.
-      use: DEFAULT_CHROMIUM,
+      use: {
+        ...DEFAULT_CHROMIUM,
+        baseURL: "http://localhost:3000",
+      },
     },
     {
       name: "@calcom/app-store",
@@ -189,6 +203,54 @@ const config: PlaywrightTestConfig = {
         timeout: DEFAULT_EXPECT_TIMEOUT,
       },
       use: { ...devices["iPhone 13"] },
+    },
+    // Microsoft Edge project for @calcom/web
+    {
+      name: "@calcom/web-edge",
+      testDir: "./apps/web/playwright",
+      testMatch: /.*\.e2e\.tsx?/,
+      expect: {
+        timeout: DEFAULT_EXPECT_TIMEOUT,
+      },
+      use: {
+        ...devices["Desktop Chrome"],
+        channel: "msedge",
+        reducedMotion: "reduce",
+        timezoneId: "Europe/London",
+        storageState: {
+          cookies: [
+            {
+              url: "http://localhost:3000",
+              name: "calcom-timezone-dialog",
+              expires: -1,
+              value: "1",
+            },
+          ],
+        },
+        locale: "en-US",
+        navigationTimeout: DEFAULT_NAVIGATION_TIMEOUT,
+        baseURL: "http://localhost:3000",
+        actionTimeout: DEFAULT_ACTION_TIMEOUT,
+        contextOptions: {
+          permissions: ["clipboard-read", "clipboard-write"],
+        },
+      },
+    },
+    // Hospital demo mock server project
+    {
+      name: "@calcom/hospital-mock",
+      testDir: "./apps/web/playwright",
+      testMatch: /hospital-demo-mock\.e2e\.ts/,
+      expect: {
+        timeout: DEFAULT_EXPECT_TIMEOUT,
+      },
+      use: {
+        ...DEFAULT_CHROMIUM,
+        viewport: { width: 390, height: 844 },
+        locale: "en-US",
+        baseURL: "http://localhost:3003",
+        trace: "retain-on-failure",
+      },
     },
   ],
 };

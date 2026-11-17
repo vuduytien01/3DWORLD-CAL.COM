@@ -36,7 +36,7 @@ generator kysely {
 }
 
 generator enums {
-  provider = "prisma-enum-generator"
+  provider = "node ./run-enum-generator.cjs"
 }
 
 enum SchedulingType {

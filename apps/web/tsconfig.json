@@ -11,6 +11,9 @@
       "@prisma/client/*": ["@calcom/prisma/client/*"],
       "@calcom/testing/*": ["../../packages/testing/src/*"],
       "@calcom/repository/*": ["@calcom/lib/server/repository/*"],
+      "@calcom/web/*": ["./*"],
+      "@calcom/features/*": ["../../packages/features/*"],
+      "@calcom/app-store/*": ["../../packages/app-store/*"],
       "@coss/ui/*": ["../../packages/coss-ui/src/*"]
     },
     "plugins": [
