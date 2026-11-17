@@ -19,6 +19,8 @@
  *   - rightArm
  */
 
+import { easings } from '../html5-world/motion-tokens';
+
 /** Node pose tối thiểu mà pose math thao tác: rotation Euler theo trục local. */
 export interface PoseRigNode {
   rotation: {
@@ -98,27 +100,50 @@ export function computeWalkPose(
 }
 
 /**
- * Idle pose — breathing nhẹ + weight shift.
+ * Idle pose — breathing nhẹ + weight shift + micro-movements (breath, weight shift, head look).
  */
 export function computeIdlePose(
   rig: PoseRig,
   t: number,
 ): CharacterPoseState {
+  // Base breathing and sway
   const breath = Math.sin(t * 2) * 0.005; // subtle chest rise
   const sway = Math.sin(t * 0.7) * 0.02; // slow weight shift
 
+  // Micro-movements with easeInOutSine for natural easing
+  // Phase shifted by -PI/2 so at t=0 all micro-movements are 0 (easeInOutSine(0) = 0)
+  // Breathing: chest rise/fall at 0.3 Hz
+  const breathPhase = (t * 0.6 * Math.PI - Math.PI / 2) % (Math.PI * 2);
+  const breathEased = easings.easeInOutSine((Math.sin(breathPhase) + 1) / 2);
+  const breathMicro = breath * breathEased;
+
+  // Weight shift: hips sway at 0.15 Hz
+  const swayPhase = (t * 0.3 * Math.PI - Math.PI / 2) % (Math.PI * 2);
+  const swayEased = easings.easeInOutSine((Math.sin(swayPhase) + 1) / 2);
+  const swayMicro = sway * swayEased * 0.5;
+
+  // Head micro-movement: occasional look around at 0.2 Hz
+  const lookPhase = (t * 0.4 * Math.PI - Math.PI / 2) % (Math.PI * 2);
+  const lookEased = easings.easeInOutSine((Math.sin(lookPhase) + 1) / 2);
+  const lookMicro = 0.01 * lookEased;
+
+  // Spine micro-sway at 0.1 Hz
+  const spinePhase = (t * 0.2 * Math.PI - Math.PI / 2) % (Math.PI * 2);
+  const spineEased = easings.easeInOutSine((Math.sin(spinePhase) + 1) / 2);
+  const spineMicro = 0.01 * spineEased;
+
   const nodes: CharacterPoseState['nodes'] = {
-    root: { x: 0, y: breath, z: sway }, // apply sway to root Z
-    spine: { x: breath * 0.5, y: 0, z: sway * 0.5 },
-    head: { x: -breath * 0.3, y: sway * 0.3, z: 0 },
+    root: { x: 0, y: breath + breathMicro, z: sway + swayMicro }, // breathing + weight shift
+    spine: { x: (breath + breathMicro) * 0.5, y: 0, z: (sway + swayMicro) * 0.5 + spineMicro },
+    head: { x: -(breath + breathMicro) * 0.3, y: sway * 0.3 + lookMicro, z: 0 },
     leftThigh: { x: 0, y: 0, z: 0 },
     leftShin: { x: 0, y: 0, z: 0 },
     leftFoot: { x: 0, y: 0, z: 0 },
     rightThigh: { x: 0, y: 0, z: 0 },
     rightShin: { x: 0, y: 0, z: 0 },
     rightFoot: { x: 0, y: 0, z: 0 },
-    leftArm: { x: breath * 0.5, y: sway * 0.2, z: 0 },
-    rightArm: { x: -breath * 0.5, y: -sway * 0.2, z: 0 },
+    leftArm: { x: (breath + breathMicro) * 0.5, y: (sway + swayMicro) * 0.2, z: 0 },
+    rightArm: { x: -(breath + breathMicro) * 0.5, y: -(sway + swayMicro) * 0.2, z: 0 },
   };
 
   applyPoseToRig(rig, nodes);

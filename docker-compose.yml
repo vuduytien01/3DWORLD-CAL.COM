@@ -92,6 +92,31 @@ services:
     healthcheck:
       disable: true
 
+  guide:
+    container_name: caldiy-guide
+    image: oven/bun:1
+    restart: unless-stopped
+    working_dir: /app/packages/features/hospital-pipeline
+    command: bun run lib/ai-guide/ws-entry.ts
+    volumes:
+      - .:/app
+    networks:
+      - stack
+    ports:
+      - "3002:3002"
+    environment:
+      - GUIDE_WS_PORT=3002
+      - FREELLM_STUB=true
+      - FREELLM_HOST=host.docker.internal
+      - FREELLM_PORT=3001
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    healthcheck:
+      test: ["CMD", "bun", "-e", "const ws = new WebSocket('ws://127.0.0.1:' + (process.env.GUIDE_WS_PORT || 3002)); ws.onopen = () => ws.send(JSON.stringify({type:'ping'})); ws.onmessage = () => process.exit(0); setTimeout(() => process.exit(1), 4000);"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
   studio:
     container_name: caldiy-studio-1
     image: calcom/cal.com:latest

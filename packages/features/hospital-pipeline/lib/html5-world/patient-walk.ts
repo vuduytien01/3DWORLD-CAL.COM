@@ -24,9 +24,10 @@ import {
 import type { DemoStateAt } from "../demo/demo-timeline";
 import { STEP_LOCATION_BY_ID, STEP_LOCATIONS } from "../step-graph/step-locations";
 import { FLOOR_HEIGHT_M } from "./world-to-screen";
+import { WALK_CYCLE_HZ } from "./motion-tokens";
 
-/** Walk-cycle rate the old three scene used (~1.2 strides per second). */
-export const WALK_CYCLE_HZ = 1.2;
+/** Re-export for tests and consumers */
+export { WALK_CYCLE_HZ } from "./motion-tokens";
 
 export interface PatientWalkState {
   /** Feet position in world meters. */

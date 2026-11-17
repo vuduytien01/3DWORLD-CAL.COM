@@ -8,6 +8,7 @@
  */
 
 import { STEP_LOCATIONS, STEP_LOCATION_BY_ID } from '../step-graph/step-locations';
+import { easings, type EasingName } from '../html5-world/motion-tokens';
 
 export interface Vec3 {
   x: number;
@@ -20,7 +21,8 @@ export interface CameraPose {
   target: Vec3;
 }
 
-export type EasingName = 'linear' | 'easeInOutCubic' | 'easeOutQuart' | 'easeInOutSine';
+// Re-export EasingName from motion-tokens for consistency
+export type { EasingName } from '../html5-world/motion-tokens';
 
 export type TransitionName = 'hold' | 'dolly' | 'crane';
 
@@ -78,12 +80,8 @@ export const DEMO_DURATION_S = 180;
 /** Any uncovered timeline stretch longer than this is a dead gap. */
 export const MAX_DEAD_GAP_S = 1;
 
-const EASINGS: Readonly<Record<EasingName, (t: number) => number>> = {
-  linear: (t) => t,
-  easeInOutCubic: (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2),
-  easeOutQuart: (t) => 1 - Math.pow(1 - t, 4),
-  easeInOutSine: (t) => (1 - Math.cos(Math.PI * t)) / 2,
-};
+// Easing functions imported from motion-tokens (single source of truth)
+const EASINGS = easings;
 
 const INTRO_AERIAL_POSE: CameraPose = {
   position: { x: 0, y: 24, z: -6 },

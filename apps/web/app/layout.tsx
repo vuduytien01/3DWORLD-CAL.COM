@@ -120,14 +120,15 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             --font-cal: ${calFont.style.fontFamily.replace(/\'/g, "")};
           }
         `}</style>
-        {process.env.NODE_ENV === "development" && (
-          <Script
-            src="//unpkg.com/react-grab/dist/index.global.js"
-            crossOrigin="anonymous"
-            strategy="beforeInteractive"
-            data-options='{"activationKey":"Meta+c"}'
-          />
-        )}
+        {process.env.NODE_ENV === "development" &&
+          process.env.NEXT_PUBLIC_IS_E2E !== "1" && (
+            <Script
+              src="//unpkg.com/react-grab/dist/index.global.js"
+              crossOrigin="anonymous"
+              strategy="beforeInteractive"
+              data-options='{"activationKey":"Meta+c"}'
+            />
+          )}
       </head>
       <body
         className="dark:bg-default bg-subtle antialiased"

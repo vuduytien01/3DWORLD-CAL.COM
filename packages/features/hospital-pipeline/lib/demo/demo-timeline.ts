@@ -24,6 +24,8 @@ export interface DemoTimeline {
   segments: readonly ChoreographySegment[];
   /** đọc trạng thái tại một mốc giây demo */
   stateAt(elapsedDemoSeconds: number): DemoStateAt;
+  /** Programmatic seek: clamps to [0, 180] and returns state at that time. Used by keyboard controls. */
+  seek(elapsedDemoSeconds: number): DemoStateAt;
 }
 
 const DEMO_WAIT_INPUTS: readonly WaitStepInput[] = [
@@ -46,16 +48,30 @@ export function composeDemoTimeline(waitSteps: readonly WaitStepInput[] = DEMO_W
   const script = buildDemoScript();
   const segments = buildChoreography();
   const waitTimeline = createWaitTimeline(waitSteps);
+  const lastSegment = segments[segments.length - 1];
+
+  const clamp = (t: number): number => Math.min(Math.max(t, 0), lastSegment.endS);
+
+  const stateAt = (elapsedDemoSeconds: number): DemoStateAt => {
+    // Don't clamp here - let callers handle out-of-bounds (e.g., patientWalkAt expects null segment)
+    const t = elapsedDemoSeconds;
+    return {
+      narration: narrationAt(script, t),
+      cameraSegment: segments.find((s) => t >= s.startS && t < s.endS),
+      wait: readWaitAt(waitTimeline, t),
+      elapsedDemoSeconds: t,
+    };
+  };
+
+  const seek = (elapsedDemoSeconds: number): DemoStateAt => {
+    // seek clamps to valid range for programmatic control
+    return stateAt(clamp(elapsedDemoSeconds));
+  };
+
   return {
     script,
     segments,
-    stateAt(elapsedDemoSeconds: number): DemoStateAt {
-      return {
-        narration: narrationAt(script, elapsedDemoSeconds),
-        cameraSegment: segments.find((s) => elapsedDemoSeconds >= s.startS && elapsedDemoSeconds < s.endS),
-        wait: readWaitAt(waitTimeline, elapsedDemoSeconds),
-        elapsedDemoSeconds,
-      };
-    },
+    stateAt,
+    seek,
   };
 }

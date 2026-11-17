@@ -1,0 +1,35 @@
+{
+  "extends": "@calcom/tsconfig/react-library.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@calcom/features/hospital-pipeline/*": ["../hospital-pipeline/lib/*"]
+    },
+    "composite": false,
+    "declaration": true,
+    "declarationMap": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "inlineSources": false,
+    "isolatedModules": true,
+    "jsx": "react-jsx",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "noEmit": true,
+    "noImplicitAny": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "preserveWatchOutput": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "target": "ES2022",
+    "types": ["react", "react-dom"]
+  },
+  "include": [
+    "src/**/*",
+    "../../types/global.d.ts"
+  ],
+  "exclude": ["node_modules", "dist"]
+}

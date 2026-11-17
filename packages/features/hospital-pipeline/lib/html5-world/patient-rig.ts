@@ -15,6 +15,7 @@ import {
   type PoseRig,
 } from "../3d-world/character-poses";
 import { type IsometricCamera, type ScreenPoint, worldToScreen } from "./world-to-screen";
+import { WALK_STRIDE, WALK_ARM_SWING } from "./motion-tokens";
 
 export interface RigPoint {
   x: number;
@@ -143,9 +144,9 @@ for (const name of CHARACTER_NODE_NAMES) {
 }
 const HEADLESS_RIG: PoseRig = { getObjectByName: (name) => HEADLESS_RIG_NODES.get(name) };
 
-/** Walk parameters matching the old three scene's PatientAvatar. */
-export const WALK_STRIDE = 0.9;
-export const WALK_ARM_SWING = 1.3;
+/** Walk parameters matching the old three scene's PatientAvatar.
+ *  Re-exported from motion-tokens for single source of truth. */
+export { WALK_STRIDE, WALK_ARM_SWING } from "./motion-tokens";
 
 export interface CharacterPoseInput {
   /** Approach segment → walk cycle; action/outro → idle breath and sway. */
