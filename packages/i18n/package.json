@@ -9,7 +9,8 @@
   "exports": {
     "./server": "./server.ts",
     "./next-i18next.config": "./next-i18next.config.js",
-    "./locales/*": "./locales/*"
+    "./locales/*": "./locales/*",
+    "./providers": "./providers.tsx"
   },
   "dependencies": {
     "i18next": "23.2.3"
