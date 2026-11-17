@@ -182,14 +182,17 @@ Test:
   `simple-hospital-test.js`, `apps/web/playwright/hospital-demo-mock.e2e.ts`,
   `apps/web/playwright/debug-hospital.e2e.ts`
 
-⚠️ Lưu ý quan trọng: **TẤT CẢ chưa commit.** Tắt máy không mất dữ liệu
-(file nằm trên disk), nhưng nên commit sớm theo conventional commits:
-- `fix(hospital-demo): declare guide ws before callbacks referencing it`
-- `fix(hospital-demo): hold seek target while paused (spec 13)`
-- `fix(platform): break enums-types cycle via constants permission type`
-- `fix(embed-core): import iframe init via relative path`
-- `chore(deps): declare bun per-workspace hoisted deps`
-- `chore(config): pin playwright 1.57.0, fix webServer cwd, ports 3000/3002`
+✅ **ĐÃ COMMIT (2026-11-18) — 10 commits trên main:**
+- `144585d7b7 fix(hospital-demo)` — TDZ + seek-hold (kèm xoá yarn.lock + untrack .yarn/ vì đã staged trước đó)
+- `91914721c0 fix(platform)` — phá vòng enums↔types qua constants
+- `2ccf1cb435 fix(embed-core)` — import relative embed-iframe-init
+- `a0497626b6 fix(i18n)` — tách providers sang @calcom/i18n
+- `1a4b48ed2a chore(deps)` — bun per-workspace deps + bun.lock + packageManager bun@1.4.4 + React 19.2.8 / Next 16.4.6
+- `7f7c8e2caf chore(config)` — playwright cwd/ports 3000+3002 + tsconfig paths + schema.prisma `node ./run-enum-generator.cjs` + .husky/lint-staged sang bun + scripts `bun --cwd`
+- `4573e00e30 test(hospital-demo)` — 2 suite E2E mới (reduced-motion, timeline-interruptibility)
+- `223a271752 feat(hospital-pipeline)` — HTML5 leftovers (motion-tokens, use-reduced-motion, hospital-3d-renderer, plans/)
+- `80f38b47d4 docs(hospital-3d)` — ledger này + tickets 08/09 DONE
+- `7ade835cf6 chore` — .gitignore (.mimosa/, nul, test-jsx*, test-proper*)
 
 ---
 
