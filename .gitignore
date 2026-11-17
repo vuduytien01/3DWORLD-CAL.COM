@@ -117,3 +117,9 @@ agents/devin-knowledge.json
 
 # pagefind
 _pagefind/
+
+# Tooling scratch, never committed
+.mimosa/
+nul
+test-jsx*
+test-proper*
