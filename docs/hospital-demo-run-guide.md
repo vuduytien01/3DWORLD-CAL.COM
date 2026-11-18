@@ -25,38 +25,55 @@ pnpm trong mọi lệnh của repo này.
 
 ## Chạy sản phẩm
 
-Mở hai terminal, từ thư mục gốc `D:\cal.diy`.
+Mở hai cửa sổ PowerShell. Cú pháp trong guide này là cú pháp PowerShell:
+biến môi trường đặt bằng `$env:`, mỗi lệnh một dòng. KHÔNG dán cú pháp Git Bash
+(`VAR=1 lệnh`, `&` cuối lệnh, `/tmp`) vào PowerShell, nó không chạy.
 
 Terminal 1, web app:
 
-```bash
-cd apps/web
-NEXT_PUBLIC_IS_E2E=1 bun run dev -p 3000
+```powershell
+cd D:\cal.diy\apps\web
+$env:NEXT_PUBLIC_IS_E2E = "1"
+bun run dev -p 3000
 ```
 
-Biến `NEXT_PUBLIC_IS_E2E=1` tắt overlay react-grab trong dev, màn hình demo sạch
-và trùng với môi trường E2E đã verify. Nếu chạy nền thì redirect ra file log:
-
-```bash
-cd apps/web && NEXT_PUBLIC_IS_E2E=1 bun run dev -p 3000 > /tmp/nextdev.log 2>&1 &
-```
-
-KHÔNG pipe server qua `head`. SIGPIPE làm chết dev server giữa chừng.
+Chạy foreground và giữ cửa sổ mở, Ctrl+C để dừng. Sau khi lệnh vào, server cần
+khoảng 40 giây trước khi nhận request đầu (turbo copy-static mất ~11 giây rồi
+Next mới boot). Đã đo: request đầu tới `/hospital-demo` trả HTTP 200 tại poll
+thứ 4, mỗi poll cách nhau 10 giây.
 
 Terminal 2, Guide Service:
 
-```bash
-cd packages/features/hospital-pipeline
-FREELLM_STUB=true bun run guide-server
+```powershell
+cd D:\cal.diy\packages\features\hospital-pipeline
+$env:FREELLM_STUB = "true"
+bun run guide-server
 ```
 
 Dòng log chuẩn: `[WS] Guide service listening on ws://localhost:3002`.
 `FREELLM_STUB=true` cho guide trả lời stub cục bộ, không gọi mạng. Nếu máy đã
 chạy FreeLLM thật trên 3001 thì bỏ biến này và đặt `FREELLM_API_KEY`.
 
+Chạy nền nếu muốn giữ log trong cửa sổ:
+
+```powershell
+Start-Job -Name guide -ScriptBlock { Set-Location D:\cal.diy\packages\features\hospital-pipeline; $env:FREELLM_STUB = "true"; bun run guide-server }
+Receive-Job guide -Keep
+Stop-Job guide; Remove-Job guide
+```
+
+Job sống trong cửa sổ PowerShell tạo nó, đóng cửa sổ là job chết.
+
 Chạy bằng Docker cũng được: `docker compose up guide` từ thư mục gốc.
 File `docker-compose.yml` định nghĩa service `guide` (image `oven/bun:1`, mount
 cả repo, cổng 3002, `FREELLM_STUB=true`, healthcheck ping WebSocket).
+
+Nếu làm việc trong Git Bash thay vì PowerShell, lệnh tương ứng:
+
+```bash
+cd /d/cal.diy/apps/web && NEXT_PUBLIC_IS_E2E=1 bun run dev -p 3000 &
+cd /d/cal.diy/packages/features/hospital-pipeline && FREELLM_STUB=true bun run guide-server &
+```
 
 ### Kiểm tra đã sống
 
@@ -127,27 +144,24 @@ accessibility, không phải lỗi.
 
 ## Chạy kiểm thử
 
-Unit gate, chạy trong package pipeline:
+Unit gate, chạy trong package pipeline (đường dẫn tuyệt đối, an toàn từ bất kỳ
+thư mục nào):
 
-```bash
-cd packages/features/hospital-pipeline
+```powershell
+cd D:\cal.diy\packages\features\hospital-pipeline
 bun run test
 ```
 
 Lần chạy đầy đủ gần nhất 2026-11-14: toàn bộ pass. Sau bất kỳ sửa nào vào
 `page.tsx` hoặc `lib/`, chạy lại và so số test với lần trước, không được mất.
 
-E2E gate trên Edge. Cần web app ở cổng 3000 đang chạy từ bước trước; Playwright
-tự nâng guide 3002 và mock 3003, và tái dùng server có sẵn:
+E2E gate trên Edge. Cần web app ở cổng 3000 đang chạy từ bước trước (biến
+`NEXT_PUBLIC_IS_E2E` đã đặt trên tiến trình server, phía playwright không cần
+đặt lại); Playwright tự nâng guide 3002 và mock 3003, và tái dùng server có sẵn.
+Chạy trong PowerShell, một dòng lệnh:
 
-```bash
-NEXT_PUBLIC_IS_E2E=1 bun x playwright test \
-  apps/web/playwright/hospital-demo-reduced-motion.e2e.ts \
-  apps/web/playwright/hospital-demo-timeline-interruptibility.e2e.ts \
-  apps/web/playwright/hospital-demo.e2e.ts \
-  apps/web/playwright/hospital-demo-guide.e2e.ts \
-  apps/web/playwright/hospital-demo-mobile.e2e.ts \
-  --project=@calcom/web-edge --workers=2 --reporter=list
+```powershell
+bun x playwright test apps/web/playwright/hospital-demo-reduced-motion.e2e.ts apps/web/playwright/hospital-demo-timeline-interruptibility.e2e.ts apps/web/playwright/hospital-demo.e2e.ts apps/web/playwright/hospital-demo-guide.e2e.ts apps/web/playwright/hospital-demo-mobile.e2e.ts --project=@calcom/web-edge --workers=2 --reporter=list
 ```
 
 Kết quả chuẩn: 24/24 passed (reduced-motion 6, timeline-interruptibility 6,
@@ -155,11 +169,12 @@ demo + guide + mobile 12). Project `@calcom/web-edge` dùng channel `msedge`,
 cần Edge đã cài trên máy.
 
 Perf gate t09, chỉ đo trên máy rảnh, Edge headed, không chạy build song song
-cùng lúc (số đo cạnh compile là nhiễu):
+cùng lúc (số đo cạnh compile là nhiễu). File test tự đọc biến `PERF_T09`, đặt
+trước khi chạy:
 
-```bash
-PERF_T09=1 bun x playwright test apps/web/playwright/perf-t09.e2e.ts \
-  --project=@calcom/web-edge
+```powershell
+$env:PERF_T09 = "1"
+bun x playwright test apps/web/playwright/perf-t09.e2e.ts --project=@calcom/web-edge
 ```
 
 Phương pháp và ngưỡng nằm trong header của `perf-t09.e2e.ts`: 90 frame warm-up
@@ -193,10 +208,14 @@ là số box vẽ và số node overlay. Lưu ý nhỏ: header file này còn gh
 
 | Hiện tượng | Nguyên nhân và cách xử lý |
 | --- | --- |
-| Dev server chết giữa chừng | Đã pipe qua `head`. Chạy lại, redirect ra file log |
+| `The term 'NEXT_PUBLIC_IS_E2E=1' is not recognized` | Đã dán cú pháp Git Bash vào PowerShell. Đặt `$env:TEN_BIEN = "1"` ở một dòng rồi chạy lệnh ở dòng kế tiếp |
+| `Cannot find path 'D:\cal.diy\apps\web\packages\...'` | Đã `cd` tương đối từ nhầm thư mục. Dùng đường dẫn tuyệt đối `D:\cal.diy\...` đúng như guide |
+| Có Job nền "Running" nhưng không server nào sống | Job tạo bằng `&` cuối lệnh giữ được một lệnh sai cú pháp. Dọn: `Get-Job \| Stop-Job; Get-Job \| Remove-Job`, rồi chạy lại foreground theo guide |
+| Cổng 3000 hoặc 3002 bị tiến trình cũ chiếm | `Get-NetTCPConnection -LocalPort 3000 \| Select-Object OwningProcess` để tìm PID, rồi `Stop-Process -Id <pid>` |
+| Dev server chết giữa chừng | Trong Git Bash đã pipe qua `head`. Chạy lại, redirect ra file log |
 | Chat báo chưa kết nối | Guide service chưa chạy trên 3002. Chạy terminal 2, trang tự reconnect. Đổi cổng thì đặt `NEXT_PUBLIC_AI_GUIDE_WS` |
 | Chat trả lời lỗi khi gửi câu | Guide chạy nhưng không có `FREELLM_STUB=true` và FreeLLM 3001 không phản hồi. Thêm biến stub hoặc bật FreeLLM |
-| Trang trắng hoặc không ready | Xem terminal 1 có lỗi compile. Sau khi sửa, đợi `[data-hospital-ready="true"]` |
+| Trang trắng hoặc không ready | Xem terminal 1 có lỗi compile. Sau khi sửa, đợi `[data-hospital-ready="true"]`. Lần đầu server cần ~40 giây |
 | Sau `bun install` trang Compile lỗi lạ | Restart mọi dev server đang chạy. Bun linker isolated thay cả cây node_modules, tiến trình cũ giữ module cũ |
 | E2E fail ngay không mở được trang | Web app chưa chạy trên 3000, hoặc Edge chưa cài (channel `msedge`) |
 | Biome trong pre-commit báo lỗi platform binary | Kiểm tra không còn file `.pnp.cjs`, `.yarn/` sót trong repo; `packageManager` trong root `package.json` phải là `bun@1.4.4` |
