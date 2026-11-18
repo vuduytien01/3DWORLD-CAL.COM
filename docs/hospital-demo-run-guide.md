@@ -299,3 +299,9 @@ Bất biến cần giữ khi sửa code:
 Tài liệu nền: ledger phiên 2026-11-17 trong `docs/`, pivot HTML5 tại
 `.superpowers/sdd/2026-11-14-html5-pivot/`, map ticket tại
 `.scratch/hospital-pipeline/map.md` (có thể bị dọn theo cache cleanup).
+
+---
+
+## Handoff cho team mới
+
+Xem **[HOSPITAL-3D-HANDOFF.md](./HOSPITAL-3D-HANDOFF.md)** — tóm tắt toàn bộ build, test, fix, config, roadmap, known issues, commit history để người mới clone về làm tiếp ngay.
