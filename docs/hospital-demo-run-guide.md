@@ -154,6 +154,18 @@ bun run test
 
 Lần chạy đầy đủ gần nhất 2026-11-14: toàn bộ pass. Sau bất kỳ sửa nào vào
 `page.tsx` hoặc `lib/`, chạy lại và so số test với lần trước, không được mất.
+`bun run test` chạy luôn 6 suite bổ sung viết 2026-11-18: config-properties
+(ràng buộc biến môi trường GUIDE_WS_PORT / GUIDE_CLEANUP_INTERVAL_MS /
+FREELLM_* và giới hạn payload 1009), motion-tokens (easing + token khoá),
+world-spec (bất biến dữ liệu STEPS/KHOA/SIGN_HOSTS), guide-service-lifecycle
+(vòng đời hội thoại qua ws thật + KNOWN ISSUE deliverRegistry nuốt reply
+wait/cost), use-reduced-motion và html5-floor-renderer (2 file này tự bật jsdom
+qua pragma, không cần cấu hình thêm).
+
+Coverage gate: `bun run test:coverage` (reporter text + json-summary + lcov,
+provider v8, `@vitest/coverage-v8` đã là devDep). Ngưỡng 80% dòng được để
+comment trong `vitest.config.ts`: bật sau lần chạy đầu để khớp mức hiện tại,
+rồi giữ bật cho mọi thay đổi sau.
 
 E2E gate trên Edge. Cần web app ở cổng 3000 đang chạy từ bước trước (biến
 `NEXT_PUBLIC_IS_E2E` đã đặt trên tiến trình server, phía playwright không cần
@@ -167,6 +179,23 @@ bun x playwright test apps/web/playwright/hospital-demo-reduced-motion.e2e.ts ap
 Kết quả chuẩn: 24/24 passed (reduced-motion 6, timeline-interruptibility 6,
 demo + guide + mobile 12). Project `@calcom/web-edge` dùng channel `msedge`,
 cần Edge đã cài trên máy.
+
+E2E đối kháng (ui-test skill, 11 test: seek storm, toggle nhanh, chat rỗng /
+500 ký tự / XSS, a11y, mobile overflow). Chạy riêng vì cần guide thật:
+
+```powershell
+bun x playwright test apps/web/playwright/hospital-demo-ui-adversarial.e2e.ts --project=@calcom/web-edge --reporter=list
+```
+
+Soak harness (soak-test skill): mặc định không chạy, bật bằng biến `SOAK_TEST`
+như mẫu PERF_T09. Chạy trên máy rảnh, ~6 phút cho 2 vòng demo đầy đủ; báo cáo
+ghi vào `test-results/soak-report.json`. Chi tiết và protocol thủ công 1h nằm
+ở `docs/hospital-3d-soak-test-protocol.md`:
+
+```powershell
+$env:SOAK_TEST = "1"
+bun x playwright test apps/web/playwright/hospital-demo-soak.e2e.ts --project=@calcom/web-edge --reporter=list
+```
 
 Perf gate t09, chỉ đo trên máy rảnh, Edge headed, không chạy build song song
 cùng lúc (số đo cạnh compile là nhiễu). File test tự đọc biến `PERF_T09`, đặt
