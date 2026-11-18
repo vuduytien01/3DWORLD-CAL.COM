@@ -3,6 +3,8 @@
 > Nguồn lưu trữ an toàn cho phiên làm việc 2026-11-17. File này nằm trong repo
 > (`docs/`), KHÔNG nằm trong thư mục temp — an toàn khi tắt máy và dọn temp.
 > Bản sao rút gọn cũng có trong ZCode memory (`cal-diy-use-bun-not-yarn.md`).
+>
+> **Hướng dẫn chạy + demo chuẩn cho maintainer:** [hospital-demo-run-guide.md](./hospital-demo-run-guide.md).
 
 ---
 
