@@ -135,9 +135,8 @@
     "@types/react-dom": "19.0.4",
     "@types/node": "^20.17.23",
     "import-in-the-middle": "1.13.1",
-    "react@19.2.8": "19.2.8",
-    "react@19.2.1": "19.2.4",
-    "react@19.2.2": "19.2.4",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
     "tar-fs": "2.1.4",
     "rollup": "4.59.0",
     "jpeg-js": "0.4.4",
@@ -233,5 +232,8 @@
   "syncpack": {
     "filter": "^(?!@calcom).*",
     "semverRange": ""
+  },
+  "dependencies": {
+    "@sentry/nextjs": "^11.14.0"
   }
 }
