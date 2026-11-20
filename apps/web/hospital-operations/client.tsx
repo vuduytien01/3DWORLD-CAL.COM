@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { Html5FloorRenderer } from "../../../packages/features/hospital-pipeline/lib/html5-world/html5-floor-renderer";
 import { FLOOR_HEIGHT_M } from "../../../packages/features/hospital-pipeline/lib/html5-world/world-to-screen";
@@ -94,15 +94,20 @@ function Booking({ config }: { config: Config }) {
 
 function Staff({ config }: { config: Config }) {
   const [key, setKey] = useState(sessionStorage.getItem("hospitalStaff") ?? "");
+  const keyRef = useRef(key);
   const [bookings, setBookings] = useState<StaffBooking[]>();
   const [admission, setAdmission] = useState<Admission>();
   const [error, setError] = useState("");
   async function refresh() {
     setError("");
+    const requestKey = keyRef.current;
     try {
-      setBookings(await api<StaffBooking[]>("bookings", key));
-      sessionStorage.setItem("hospitalStaff", key);
+      const result = await api<StaffBooking[]>("bookings", requestKey);
+      if (keyRef.current !== requestKey) return;
+      setBookings(result);
+      sessionStorage.setItem("hospitalStaff", requestKey);
     } catch (problem) {
+      if (keyRef.current !== requestKey) return;
       setBookings(undefined);
       setError(stringError(problem));
     }
@@ -136,6 +141,7 @@ function Staff({ config }: { config: Config }) {
               value={key}
               required
               onChange={(event) => {
+                keyRef.current = event.target.value;
                 setKey(event.target.value);
                 setBookings(undefined);
                 setAdmission(undefined);
