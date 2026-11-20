@@ -1,0 +1,133 @@
+:root {
+  font:
+    16px / 1.55 "Segoe UI",
+    system-ui,
+    sans-serif;
+  color: #142d35;
+  background: #edf5f4;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+}
+a {
+  color: #07594e;
+}
+header {
+  padding: 1rem max(1rem, calc((100vw - 68rem) / 2));
+  border-bottom: 1px solid #c9dfda;
+  background: white;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.65rem 1rem;
+}
+nav,
+.actions {
+  display: flex;
+  align-items: end;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+nav a,
+.brand {
+  font-weight: 650;
+}
+.badge {
+  color: #475425;
+  background: #edf1d9;
+  margin-left: 0.55rem;
+  padding: 0.15rem 0.45rem;
+  font-size: 0.875rem;
+}
+main {
+  max-width: 70rem;
+  padding: 1.25rem 1rem;
+  margin: 0 auto;
+}
+.panel {
+  background: white;
+  border: 1px solid #cbdfdc;
+  border-radius: 12px;
+  padding: clamp(1rem, 3vw, 2rem);
+  margin-bottom: 1rem;
+}
+h1,
+h2 {
+  margin: 0 0 0.65rem;
+  line-height: 1.2;
+}
+h1 {
+  font-size: clamp(1.75rem, 4vw, 2.5rem);
+}
+h2 {
+  font-size: 1.25rem;
+}
+.muted {
+  color: #49636a;
+  overflow-wrap: anywhere;
+}
+button,
+input,
+.button {
+  font: inherit;
+  border-radius: 6px;
+  padding: 0.5rem 0.8rem;
+  border: 1px solid #52756e;
+}
+button,
+.button {
+  display: inline-block;
+  color: white;
+  background: #07594e;
+  cursor: pointer;
+  text-decoration: none;
+}
+:focus-visible {
+  outline: 3px solid #b56b0c;
+  outline-offset: 3px;
+}
+label input {
+  display: block;
+  width: min(15rem, 100%);
+}
+.feedback,
+.error {
+  border-radius: 6px;
+  padding: 0.75rem 1rem;
+  background: #e4f3ef;
+}
+.error {
+  background: #feeae7;
+  color: #782629;
+}
+.bookings {
+  padding: 0;
+  list-style: none;
+  margin: 0.75rem 0;
+}
+.bookings li {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 0;
+  border-top: 1px solid #d1e2df;
+}
+figure {
+  margin: 0;
+  padding: 0.5rem;
+  text-align: center;
+}
+.model {
+  position: relative;
+  height: clamp(20rem, 57vh, 32rem);
+  overflow: hidden;
+  border: 1px solid #cbdfdc;
+  background: #f2f8f7;
+  border-radius: 9px;
+  margin-top: 1rem;
+}
