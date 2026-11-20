@@ -229,10 +229,16 @@ function Patient() {
       const code = location.hash.slice(1);
       const marker = new URLSearchParams(location.search).get("marker");
       if (code) {
-        const claimed = await api<{ token: string }>("claim", undefined, { code });
-        key = claimed.token;
-        localStorage.setItem("hospitalVisit", key);
-        setToken(key);
+        try {
+          const claimed = await api<{ token: string }>("claim", undefined, { code });
+          key = claimed.token;
+          localStorage.setItem("hospitalVisit", key);
+          setToken(key);
+        } catch {
+          // Claim failed (link already used or expired): fall back to the saved token below.
+        } finally {
+          history.replaceState(null, "", location.pathname);
+        }
       }
       if (!key) return;
       setVisit(
